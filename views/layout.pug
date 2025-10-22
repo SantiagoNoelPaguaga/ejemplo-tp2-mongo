@@ -1,0 +1,26 @@
+doctype html
+html
+  head
+    title Clínica Salud
+    link(rel="icon" type="image/png" href="/images/logo_clinica.jpeg")
+    link(rel="stylesheet" href="/stylesheets/global.css")
+    link(rel="stylesheet" href="/stylesheets/layout.css")  
+    link(rel="stylesheet" href="/stylesheets/sidebar/sidebar.css")
+    link(rel="stylesheet" href="/stylesheets/footer/footer.css")
+    link(rel="stylesheet" href="/stylesheets/mixin/title.css")
+    link(rel="stylesheet" href="/stylesheets/mixin/modal.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
+    block head 
+  body
+    .layoutContainer
+      .layoutBackground
+        include ./sidebar/sidebar.pug
+        main.mainWrapper
+          block content  // aquí se renderiza el contenido de cada ruta
+
+      include ./footer/footer.pug
+
+    script(src="/javascripts/sidebar/sidebar.js")
+    script(src="/javascripts/mixin/deleteModal.js")
+    script(src="/javascripts/mixin/errorModal.js")
+    block scripts
