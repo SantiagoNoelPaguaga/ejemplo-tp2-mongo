@@ -14,7 +14,7 @@ block content
         .dni-busqueda
             input(
                 type="text"
-                name="dniPaciente"
+                name="paciente[dni]"
                 id="dniPaciente"
                 placeholder="Ingrese el DNI"
                 required
@@ -54,12 +54,9 @@ block content
             option(value="estudio" selected=(formData && formData.tipoTurno === 'estudio')) Estudio Médico
             option(value="control" selected=(formData && formData.tipoTurno === 'control')) Control
 
-        label(for="estudioMedico" hidden=!(formData && formData.tipoTurno === 'estudio')) Estudio Médico
-        select(name="estudioMedico" id="estudioMedico" hidden=!(formData && formData.tipoTurno === 'estudio'))
-            option(value="" selected disabled) Seleccione un estudio
-            option(value="Radiografía" selected=(formData && formData.estudioMedico === 'Radiografía')) Radiografía
-            option(value="Electrocardiograma" selected=(formData && formData.estudioMedico === 'Electrocardiograma')) Electrocardiograma
-            option(value="Análisis de Sangre" selected=(formData && formData.estudioMedico === 'Análisis de Sangre')) Análisis de Sangre
+        label(for="descripcion" hidden) Descripción
+        select(name="descripcion" id="descripcion" hidden)
+            option(value="" selected disabled) Seleccione una opción
 
         label(for="medicoId" hidden=!(formData && formData.medico && formData.medico.id)) Médico
         select(name="medico[id]" id="medicoId" hidden=!(formData && formData.medico && formData.medico.id))

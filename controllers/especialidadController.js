@@ -20,6 +20,16 @@ class EspecialidadController {
       throw new Error("No se pudo buscar la especialidad");
     }
   }
+
+  static async obtenerEspecialidadesJson(req, res) {
+    try {
+      const especialidades = await Especialidad.obtenerTodas();
+      res.json(especialidades || []);
+    } catch (error) {
+      console.error("Error al obtener especialidades:", error);
+      res.json([]);
+    }
+  }
 }
 
 export default EspecialidadController;

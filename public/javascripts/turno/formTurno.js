@@ -2,7 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnBuscarPaciente = document.getElementById("btnBuscarPaciente");
   const dniPaciente = document.getElementById("dniPaciente");
   const tipoTurno = document.getElementById("tipoTurno");
-  const estudioLabel = document.querySelector("label[for='estudioMedico']");
+  const descripcionSelect = document.getElementById("descripcion");
+  const descripcionLabel = document.querySelector("label[for='descripcion']");
   const estudioSelect = document.getElementById("estudioMedico");
   const medicoLabel = document.querySelector("label[for='medicoId']");
   const medicoSelect = document.getElementById("medicoId");
@@ -21,28 +22,40 @@ document.addEventListener("DOMContentLoaded", () => {
   tipoTurno.addEventListener("change", async () => {
     const tipo = tipoTurno.value;
 
+    let opciones = [];
+
     if (tipo === "estudio") {
-      estudioLabel.hidden = false;
-      estudioSelect.hidden = false;
+      opciones = ["Radiografía", "Electrocardiograma", "Análisis de Sangre"];
     } else {
-      estudioLabel.hidden = true;
-      estudioSelect.hidden = true;
-      estudioSelect.value = "";
-      await cargarMedicos(tipo);
+      // opciones = ["Cardiología", "Oftalmología", "Psiquiatría"];
+      try {
+        const res = await fetch("/api/especialidades");
+        const data = await res.json();
+        console.log(data);
+        opciones = data.map((e) => e.nombre);
+      } catch (err) {
+        console.error("Error en fetch:", err);
+        opciones = [];
+      }
     }
+
+    descripcionSelect.innerHTML = `<option value="" selected disabled>Seleccione una opción</option>`;
+    opciones.forEach((op) => {
+      const opt = document.createElement("option");
+      opt.value = op;
+      opt.textContent = op;
+      descripcionSelect.appendChild(opt);
+    });
+
+    descripcionLabel.hidden = false;
+    descripcionSelect.hidden = false;
   });
 
-  estudioSelect.addEventListener("change", async () => {
-    if (tipoTurno.value === "estudio") {
-      await cargarMedicos("estudio", estudioSelect.value);
-    }
+  descripcionSelect.addEventListener("change", async () => {
+    cargarMedicos();
   });
 
-  async function cargarMedicos(tipo, estudio = null) {
-    medicoLabel.hidden = true;
-    medicoSelect.hidden = true;
-    medicoSelect.innerHTML = `<option value="" selected disabled>Cargando...</option>`;
-
+  async function cargarMedicos() {
     try {
       const medicosEjemplo = [
         { _id: "1", nombre: "Juan", apellido: "Pérez" },
