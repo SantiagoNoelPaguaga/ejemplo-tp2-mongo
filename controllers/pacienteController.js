@@ -1,4 +1,5 @@
 import Paciente from "../models/PacienteModel.js";
+import CoberturaController from "./coberturaController.js";
 
 const validarCampos = (data) => {
   const requiredFields = [
@@ -51,13 +52,28 @@ const mostrarPacientes = async (req, res) => {
   }
 };
 
-const formularioNuevoPaciente = (req, res) => {
-  res.render("paciente/nuevoPaciente", {
-    formData: {},
-    modalMessage: null,
-    modalType: null,
-    modalTitle: null,
-  });
+const formularioNuevoPaciente = async (req, res) => {
+  try {
+    const coberturas = await CoberturaController.obtenerCoberturas();
+
+    res.render("paciente/nuevoPaciente", {
+      formData: {},
+      coberturas,
+      modalMessage: null,
+      modalType: null,
+      modalTitle: null,
+    });
+  } catch (error) {
+    console.error("Error al cargar formulario de nuevo paciente:", error);
+
+    res.render("paciente/nuevoPaciente", {
+      formData: {},
+      coberturas: [],
+      modalMessage: "Error al cargar las coberturas",
+      modalType: "error",
+      modalTitle: "Error",
+    });
+  }
 };
 
 const guardarPaciente = async (req, res) => {
@@ -65,11 +81,13 @@ const guardarPaciente = async (req, res) => {
 
   const errorValidacion = validarCampos(data);
   if (errorValidacion) {
+    const coberturas = await CoberturaController.obtenerCoberturas();
     return res.render("paciente/nuevoPaciente", {
       modalMessage: errorValidacion,
       modalType: "error",
       modalTitle: "Error",
       formData: data,
+      coberturas,
     });
   }
 
@@ -82,11 +100,13 @@ const guardarPaciente = async (req, res) => {
     let message = "Error al guardar paciente";
     if (error.code === 11000) message = "Ya existe un paciente con ese DNI";
 
+    const coberturas = await CoberturaController.obtenerCoberturas();
     res.render("paciente/nuevoPaciente", {
       modalMessage: message,
       modalType: "error",
       modalTitle: "Error",
       formData: data,
+      coberturas,
     });
   }
 };
@@ -94,17 +114,19 @@ const guardarPaciente = async (req, res) => {
 const formularioEditarPaciente = async (req, res) => {
   try {
     const paciente = await Paciente.obtenerPorId(req.params.id);
-    if (!paciente) {
-      return res.redirect("/pacientes");
-    }
+    if (!paciente) return res.redirect("/pacientes");
+
+    const coberturas = await CoberturaController.obtenerCoberturas();
+
     res.render("paciente/editarPaciente", {
       paciente,
+      coberturas,
       modalMessage: null,
       modalType: null,
       modalTitle: null,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error al cargar formulario de edición:", error);
     res.redirect("/pacientes");
   }
 };
@@ -114,11 +136,13 @@ const actualizarPaciente = async (req, res) => {
 
   const errorValidacion = validarCampos(data);
   if (errorValidacion) {
+    const coberturas = await CoberturaController.obtenerCoberturas();
     return res.render("paciente/editarPaciente", {
       modalMessage: errorValidacion,
       modalType: "error",
       modalTitle: "Error",
       paciente: { _id: req.params.id, ...data },
+      coberturas,
     });
   }
 
@@ -131,11 +155,13 @@ const actualizarPaciente = async (req, res) => {
     let message = "Error al actualizar paciente";
     if (error.code === 11000) message = "Ya existe un paciente con ese DNI";
 
+    const coberturas = await CoberturaController.obtenerCoberturas();
     res.render("paciente/editarPaciente", {
       modalMessage: message,
       modalType: "error",
       modalTitle: "Error",
       paciente: { _id: req.params.id, ...data },
+      coberturas,
     });
   }
 };
@@ -161,6 +187,52 @@ const eliminarPaciente = async (req, res) => {
   }
 };
 
+const buscarPorDniForm = async (req, res) => {
+  try {
+    const { dni } = req.query;
+
+    if (!dni) {
+      return res.render("turno/nuevoTurno", {
+        modalMessage: "Debe ingresar un DNI",
+        modalType: "error",
+        modalTitle: "Error",
+        formData: {},
+      });
+    }
+
+    const paciente = await Paciente.obtenerPorDni(dni);
+
+    if (!paciente) {
+      return res.render("turno/nuevoTurno", {
+        modalMessage: `No se encontró un paciente con DNI ${dni}`,
+        modalType: "error",
+        modalTitle: "Paciente no encontrado",
+        formData: {},
+      });
+    }
+
+    res.render("turno/nuevoTurno", {
+      modalMessage: null,
+      modalType: null,
+      modalTitle: null,
+      formData: {
+        id: paciente._id,
+        nombre: paciente.nombre,
+        apellido: paciente.apellido,
+        dni: paciente.dni,
+      },
+    });
+  } catch (error) {
+    console.error("Error al buscar paciente para turno:", error);
+    res.render("turno/nuevoTurno", {
+      modalMessage: "Error interno al buscar paciente",
+      modalType: "error",
+      modalTitle: "Error",
+      formData: {},
+    });
+  }
+};
+
 export default {
   mostrarPacientes,
   formularioNuevoPaciente,
@@ -168,4 +240,5 @@ export default {
   formularioEditarPaciente,
   actualizarPaciente,
   eliminarPaciente,
+  buscarPorDniForm,
 };

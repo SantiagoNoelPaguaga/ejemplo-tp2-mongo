@@ -13,4 +13,6 @@ router.put("/edit/:id", pacienteController.actualizarPaciente);
 
 router.delete("/delete/:id", pacienteController.eliminarPaciente);
 
+router.get("/buscar", pacienteController.buscarPorDniForm);
+
 export default router;

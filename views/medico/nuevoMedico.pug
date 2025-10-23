@@ -72,16 +72,17 @@ block content
             value=(formData && formData.domicilio || '')
         )
 
-        label(for="especialidades") Especialidades (separadas por comas)
-        input(
-            type="text"
-            name="especialidades"
-            id="especialidades"
-            placeholder="Ej: Cardiología, Pediatría"
-            value=(formData && formData.especialidades ? formData.especialidades.join(', ') : '')
-        )
+        label(for="especialidades") Especialidades
+        select(name="especialidades" id="especialidades" multiple)
+            each esp in especialidades
+                option(
+                    value=esp.nombre
+                    selected=(formData && formData.especialidades && formData.especialidades.includes(esp.nombre))
+                )= esp.nombre
 
         button(type="submit") Registrar médico
 
     if modalMessage
         +Modal('modalGeneric', modalTitle, modalMessage, modalType)
+
+

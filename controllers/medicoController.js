@@ -1,4 +1,5 @@
 import Medico from "../models/MedicoModel.js";
+import EspecialidadController from "./especialidadController.js";
 
 const validarCampos = (data) => {
   const requiredFields = [
@@ -13,7 +14,8 @@ const validarCampos = (data) => {
   ];
 
   const missingFields = requiredFields.filter(
-    (field) => !data[field] || data[field].trim() === ""
+    (field) =>
+      !data[field] || (Array.isArray(data[field]) && data[field].length === 0)
   );
 
   if (missingFields.length > 0) {
@@ -21,7 +23,6 @@ const validarCampos = (data) => {
       ", "
     )}`;
   }
-
   return null;
 };
 
@@ -55,9 +56,11 @@ const mostrarMedicos = async (req, res) => {
   }
 };
 
-const formularioNuevoMedico = (req, res) => {
+const formularioNuevoMedico = async (req, res) => {
+  const especialidades = await EspecialidadController.obtenerEspecialidades();
   res.render("medico/nuevoMedico", {
     formData: {},
+    especialidades,
     modalMessage: null,
     modalType: null,
     modalTitle: null,
@@ -66,31 +69,30 @@ const formularioNuevoMedico = (req, res) => {
 
 const guardarMedico = async (req, res) => {
   const data = req.body;
-  const errorValidacion = validarCampos(data);
+  const especialidadesDisponibles =
+    await EspecialidadController.obtenerEspecialidades();
+
+  const especialidadesSeleccionadas = data.especialidades || [];
+
+  const errorValidacion = validarCampos({
+    ...data,
+    especialidades: especialidadesSeleccionadas,
+  });
 
   if (errorValidacion) {
-    const medicoData = {
-      _id: req.params.id,
-      ...data,
-      especialidades: data.especialidades
-        ? data.especialidades.split(",").map((e) => e.trim())
-        : [],
-    };
-
     return res.render("medico/nuevoMedico", {
       modalMessage: errorValidacion,
       modalType: "error",
       modalTitle: "Error",
-      formData: medicoData,
+      formData: { ...data, especialidades: especialidadesSeleccionadas },
+      especialidades: especialidadesDisponibles,
     });
   }
 
   try {
     await Medico.crearMedico({
       ...data,
-      especialidades: data.especialidades
-        ? data.especialidades.split(",").map((e) => e.trim())
-        : [],
+      especialidades: especialidadesSeleccionadas,
     });
     res.redirect("/medicos");
   } catch (error) {
@@ -103,12 +105,8 @@ const guardarMedico = async (req, res) => {
       modalMessage: message,
       modalType: "error",
       modalTitle: "Error",
-      formData: {
-        ...data,
-        especialidades: data.especialidades
-          ? data.especialidades.split(",").map((e) => e.trim())
-          : [],
-      },
+      formData: { ...data, especialidades: especialidadesSeleccionadas },
+      especialidades: especialidadesDisponibles,
     });
   }
 };
@@ -116,11 +114,12 @@ const guardarMedico = async (req, res) => {
 const formularioEditarMedico = async (req, res) => {
   try {
     const medico = await Medico.obtenerPorId(req.params.id);
-    if (!medico) {
-      return res.redirect("/medicos");
-    }
+    if (!medico) return res.redirect("/medicos");
+
+    const especialidades = await EspecialidadController.obtenerEspecialidades();
     res.render("medico/editarMedico", {
       medico,
+      especialidades,
       modalMessage: null,
       modalType: null,
       modalTitle: null,
@@ -133,31 +132,34 @@ const formularioEditarMedico = async (req, res) => {
 
 const actualizarMedico = async (req, res) => {
   const data = req.body;
-  const errorValidacion = validarCampos(data);
+  const especialidadesDisponibles =
+    await EspecialidadController.obtenerEspecialidades();
+
+  const especialidadesSeleccionadas = data.especialidades || [];
+
+  const errorValidacion = validarCampos({
+    ...data,
+    especialidades: especialidadesSeleccionadas,
+  });
 
   if (errorValidacion) {
-    const medicoData = {
-      _id: req.params.id,
-      ...data,
-      especialidades: data.especialidades
-        ? data.especialidades.split(",").map((e) => e.trim())
-        : [],
-    };
-
     return res.render("medico/editarMedico", {
       modalMessage: errorValidacion,
       modalType: "error",
       modalTitle: "Error",
-      medico: medicoData,
+      medico: {
+        _id: req.params.id,
+        ...data,
+        especialidades: especialidadesSeleccionadas,
+      },
+      especialidades: especialidadesDisponibles,
     });
   }
 
   try {
     await Medico.actualizarMedico(req.params.id, {
       ...data,
-      especialidades: data.especialidades
-        ? data.especialidades.split(",").map((e) => e.trim())
-        : [],
+      especialidades: especialidadesSeleccionadas,
     });
     res.redirect("/medicos");
   } catch (error) {
@@ -166,19 +168,16 @@ const actualizarMedico = async (req, res) => {
     if (error.code === 11000)
       message = "Ya existe un médico con ese DNI o matrícula";
 
-    const medicoData = {
-      _id: req.params.id,
-      ...data,
-      especialidades: data.especialidades
-        ? data.especialidades.split(",").map((e) => e.trim())
-        : [],
-    };
-
     res.render("medico/editarMedico", {
       modalMessage: message,
       modalType: "error",
       modalTitle: "Error",
-      medico: medicoData,
+      medico: {
+        _id: req.params.id,
+        ...data,
+        especialidades: especialidadesSeleccionadas,
+      },
+      especialidades: especialidadesDisponibles,
     });
   }
 };

@@ -47,6 +47,11 @@ pacienteSchema.statics.eliminarPaciente = async function (id) {
   return this.findByIdAndDelete(id);
 };
 
+pacienteSchema.statics.obtenerPorDni = async function (dni) {
+  if (!dni) throw new Error("Debe proporcionar un DNI");
+  return this.findOne({ dni }).lean();
+};
+
 const Paciente = mongoose.model("Paciente", pacienteSchema);
 
 export default Paciente;

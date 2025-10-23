@@ -11,65 +11,65 @@ block content
     form(id="formPaciente" action="/pacientes/new" method="POST")
         label(for="nombre") Nombre
         input(
-            type="text" 
-            name="nombre" 
-            id="nombre" 
-            placeholder="Ingrese el nombre" 
-            value=(formData && formData.nombre || '')
+            type="text"
+            name="nombre"
+            id="nombre"
+            placeholder="Ingrese el nombre"
+            value=(formData && formData.nombre ? formData.nombre : '')
         )
 
         label(for="apellido") Apellido
         input(
-            type="text" 
-            name="apellido" 
-            id="apellido" 
-            placeholder="Ingrese el apellido" 
-            value=(formData && formData.apellido || '')
+            type="text"
+            name="apellido"
+            id="apellido"
+            placeholder="Ingrese el apellido"
+            value=(formData && formData.apellido ? formData.apellido : '')
         )
 
         label(for="dni") DNI
         input(
-            type="text" 
-            name="dni" 
-            id="dni" 
-            placeholder="Ingrese el DNI" 
-            value=(formData && formData.dni || '')
+            type="text"
+            name="dni"
+            id="dni"
+            placeholder="Ingrese el DNI"
+            value=(formData && formData.dni ? formData.dni : '')
         )
 
         label(for="cobertura") Cobertura
-        input(
-            type="text" 
-            name="cobertura" 
-            id="cobertura" 
-            placeholder="Ingrese la cobertura" 
-            value=(formData && formData.cobertura || '')
-        )
+        select(name="cobertura" id="cobertura")
+            option(value="") Seleccione una cobertura
+            each cobertura in coberturas
+                option(
+                    value=cobertura.nombre
+                    selected=(formData && formData.cobertura === cobertura.nombre)
+                )= cobertura.nombre
 
         label(for="email") Email
         input(
-            type="email" 
-            name="email" 
-            id="email" 
-            placeholder="Ingrese el email" 
-            value=(formData && formData.email || '')
+            type="email"
+            name="email"
+            id="email"
+            placeholder="Ingrese el email"
+            value=(formData && formData.email ? formData.email : '')
         )
 
         label(for="telefono") Teléfono
         input(
-            type="text" 
-            name="telefono" 
-            id="telefono" 
-            placeholder="Ingrese el teléfono" 
-            value=(formData && formData.telefono || '')
+            type="text"
+            name="telefono"
+            id="telefono"
+            placeholder="Ingrese el teléfono"
+            value=(formData && formData.telefono ? formData.telefono : '')
         )
 
         label(for="domicilio") Domicilio
         input(
-            type="text" 
-            name="domicilio" 
-            id="domicilio" 
-            placeholder="Ingrese el domicilio" 
-            value=(formData && formData.domicilio || '')
+            type="text"
+            name="domicilio"
+            id="domicilio"
+            placeholder="Ingrese el domicilio"
+            value=(formData && formData.domicilio ? formData.domicilio : '')
         )
 
         button(type="submit") Registrar paciente
